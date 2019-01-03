@@ -109,6 +109,12 @@ class ScenarioTest < Minitest::Test
     assert_equal(1, role.scripts.size)
   end
 
+  def test_scenario_references
+    scenario = Scenario.new(directory, hash)
+    assert_respond_to(scenario, :subnets)
+    assert_equal(1, scenario.subnets.size)
+  end
+
   def test_script_templating
     scenario = Scenario.new(directory, hash)
     instance = scenario.instances.first

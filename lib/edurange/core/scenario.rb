@@ -67,6 +67,10 @@ class Scenario
     instances.flat_map{ |instance| instance.recipes }
   end
 
+  def subnets
+    clouds.flat_map{ |cloud| cloud.subnets }
+  end
+
   def instances
     clouds.flat_map{ |cloud| cloud.instances }
   end

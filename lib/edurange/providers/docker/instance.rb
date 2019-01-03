@@ -33,8 +33,6 @@ class EDURange::Docker::Instance
     subnet.cloud
   end
 
-  # TODO: refactor image and container stuff into separate class. instance can coordinate between them.
-
   def started?
     container = EDURange::Docker::InstanceContainer.find(@instance_config)
     not container.nil? and container.info["State"] == 'running'
@@ -78,7 +76,6 @@ class EDURange::Docker::Instance
   def create_build_directory(path)
     EDURange::Docker::InstanceImage.create_build_directory(path, self)
   end
-
 
   # TODO, should weird internals be exposed? for debugging, they seem useful.
 #  def with_docker_build_directory(&block)
