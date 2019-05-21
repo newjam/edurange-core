@@ -5,7 +5,7 @@ require_relative 'aws/scenario'
 
 module EDURange
   module AWS
-    def self.foo(config)
+    def self.wrap(config)
       AWS.assert_environment_variables_present
       ec2 = Aws::EC2::Resource.new
       s3 = Aws::S3::Resource.new(region: ENV['AWS_REGION'])

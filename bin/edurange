@@ -18,7 +18,7 @@ if ARGV.size < 2 then
 end
 
 scenario_config = Scenario.load_from_yaml_file(ARGV[0])
-scenario = EDURange::Docker.foo(scenario_config)
+scenario = EDURange::Docker.wrap(scenario_config)
 
 # puts EDURange::Docker::Instance.find(scenario.instances.first)
 
