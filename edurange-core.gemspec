@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   # AWS provider specific files
   s.add_runtime_dependency 'aws-sdk-ec2', '1.51.0'
   s.add_runtime_dependency 'aws-sdk-s3', '1.21.0'
+  s.add_runtime_dependency 'aws-sdk-iam', '1.21.0'
 
   # Docker provider specific files
   s.add_runtime_dependency 'docker-api', '1.34.2'

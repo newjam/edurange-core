@@ -1,6 +1,7 @@
 require 'ipaddress'
 require_relative 'inspect'
 require_relative 'user_access'
+require_relative 'instance_script'
 
 class Instance
   include Inspect
@@ -57,7 +58,7 @@ class Instance
   end
 
   def scripts
-    roles.flat_map{ |role| role.scripts }
+    roles.flat_map{ |role| role.scripts.map{ |script| InstanceScript.new(self, script) } }
   end
 
   def packages

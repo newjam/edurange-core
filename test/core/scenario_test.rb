@@ -120,7 +120,8 @@ class ScenarioTest < Minitest::Test
     instance = scenario.instances.first
     script = instance.scripts.first
 
-    actual = script.contents_for(instance)
+    actual = script.contents
+    puts actual
     assert(actual.include? 'useradd')
     assert(actual.include? '--home-dir /home/james')
   end

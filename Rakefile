@@ -23,6 +23,6 @@ end
 desc 'Run aws integration tests'
 Rake::TestTask.new do |t|
   t.name = "test:providers:aws"
-  t.test_files = FileList['test/providers/aws_test.rb']
+  t.test_files = FileList['test/providers/aws/**/*_test.rb']
 end
 

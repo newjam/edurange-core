@@ -16,9 +16,10 @@ module EDURange
         @instance = Instance.preexisting_aws_instance(ec2, self)
       end
 
-      delegate [:name, :os, :ip_address, :ip_address_dynamic, :users, :administrators, :recipes, :packages, :cloud, :scenario, :subnet, :internet_accessible?, :roles] => :@config
+      attr_reader :ec2
 
-      # a globally unique identifier for this EduRange instance.
+      delegate [:name, :os, :ip_address, :ip_address_dynamic, :users, :administrators, :recipes, :scripts, :packages, :cloud, :scenario, :subnet, :internet_accessible?, :roles] => :@config
+
       def identifier
         # todo: needs additional identifier to differentiate between instances of scenarios.
         "edurange:#{scenario.name}/#{cloud.name}/#{subnet.name}/#{self.name}"
@@ -35,7 +36,7 @@ module EDURange
           subnet: @config.subnet.name,
           instance: @config.name
 
-        @instance = Instance.create_instance(@config, subnet, status_s3_object_put_url)
+        @instance = create_instance subnet
 
         logger.info "instance id: #{@instance.id}"
 
@@ -91,17 +92,25 @@ module EDURange
       private
 
       def status_s3_object
-        @status_s3_object ||= Instance.status_s3_object @s3
+        s3_bucket.object("#{scenario.name}/#{cloud.name}/#{subnet.name}/#{self.name}/status")
       end
 
       def status_s3_object_put_url
         status_s3_object.presigned_url(:put)
       end
 
-      def Instance.status_s3_object s3
-         bucket = s3.bucket('edurange-playground')
-         bucket.create() if not bucket.exists?
-         bucket.object('status') # TODO, needs to be unique identifier for this scenario/instance
+      def iam
+        Aws::IAM::Resource.new
+      end
+
+      def s3
+        @s3
+      end
+
+      def s3_bucket
+        bucket = s3.bucket "edurange-#{iam.current_user.user_name}"
+        bucket.create() if not bucket.exists?
+        bucket
       end
 
       # retrieves instance from subnet with correct name.
@@ -116,16 +125,37 @@ module EDURange
       #  }).first
       #end
 
-      def Instance.create_instance(config, subnet, status_object_url)
+      def startup_script
+        self.scripts.map{|script| script.contents }.join("\n\n")
+      end
+
+      def create_instance subnet
         subnet.create_instances({
-          image_id: 'ami-40184038', # TODO, just hardcoding the ami right now.
-          private_ip_address: config.ip_address.to_s,
+          image_id: find_ubuntu_image.id,
+          private_ip_address: @config.ip_address.to_s,
           max_count: 1,
           min_count: 1,
-          instance_type: 't1.micro', # TODO, also shouldn't be hardcoded?
-          user_data: Base64.encode64(config.startup_script.gsub("{{status_object_url}}", status_object_url)), # todo use actual templates eventually.
+          instance_type: 't2.small', # TODO, also shouldn't be hardcoded?
+          user_data: Base64.encode64(startup_script),
 #          key_name: key_name
         }).first
+      end
+
+      # there are different images for different regions, so it is useful to dynamically find the appropriate image
+      def find_ubuntu_image
+        images = ec2.images({
+          filters: [
+            {
+              name: 'state',
+              values: ['available']
+            },
+            {
+              name: 'name',
+              values: ['ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-????????']
+            }
+          ]
+        })
+        images.sort_by {|image| image.creation_date }.reverse.first
       end
 
       def Instance.tag_instance(config, instance)

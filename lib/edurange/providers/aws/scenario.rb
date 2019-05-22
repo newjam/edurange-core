@@ -1,5 +1,5 @@
 
-require 'core/scenario'
+require 'edurange/core/scenario'
 require 'forwardable'
 require_relative 'cloud'
 

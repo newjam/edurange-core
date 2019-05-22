@@ -1,5 +1,6 @@
 require 'aws-sdk-ec2'
 require 'aws-sdk-s3'
+require 'aws-sdk-iam'
 
 require_relative 'aws/scenario'
 

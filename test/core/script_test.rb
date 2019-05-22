@@ -1,5 +1,6 @@
 require_relative '../test_helper.rb'
 require 'edurange/core/script'
+require 'edurange/core/instance_script'
 require 'edurange/core/scenario'
 require 'mustache'
 
@@ -12,6 +13,16 @@ class ScriptTest < MiniTest::Test
     mock_instance = OpenStruct.new(name: 'InstanceName', players: [OpenStruct.new(login: 'james')])
     contents = script.contents_for(mock_instance)
     assert_equal("echo \"InstanceName\"\necho \"james\"\n", contents)
+  end
+
+  def test_instance_script
+    path = Pathname.new(__dir__) + 'test_script.sh.mustache'
+    name = 'test_script'
+    script = Script.new(path, name)
+    mock_instance = OpenStruct.new(name: 'InstanceName', players: [OpenStruct.new(login: 'james')])
+
+    x = InstanceScript.new(mock_instance, script)
+    assert_equal("echo \"InstanceName\"\necho \"james\"\n", x.contents)
   end
 
   class Foo
